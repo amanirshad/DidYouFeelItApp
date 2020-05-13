@@ -1,5 +1,6 @@
 package com.amanirshad.didyoufeelit;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -19,12 +20,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
+        task.execute(USGS_REQUEST_URL);
 
-        // Perform the HTTP request for earthquake data and process the response.
-        Event earthquake = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
 
-        // Update the information displayed to the user.
-        updateUi(earthquake);
     }
 
     /**
@@ -39,5 +38,21 @@ public class MainActivity extends AppCompatActivity {
 
         TextView magnitudeTextView = (TextView) findViewById(R.id.perceived_magnitude);
         magnitudeTextView.setText(earthquake.perceivedStrength);
+    }
+
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void, Event>{
+        @Override
+        protected void onPostExecute(Event result) {
+
+            // Update the information displayed to the user.
+            updateUi(result);
+        }
+
+        @Override
+        protected Event doInBackground(String... urls) {
+            // Perform the HTTP request for earthquake data and process the response.
+            Event earthquake = Utils.fetchEarthquakeData(urls[0]);
+            return earthquake;
+        }
     }
 }
